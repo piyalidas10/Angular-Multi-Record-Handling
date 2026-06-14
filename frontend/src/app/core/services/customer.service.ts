@@ -20,7 +20,7 @@ export class CustomerService {
 
     return this.http
       .get(
-        `http://localhost:3000/customers?search=${term}`
+        `http://localhost:3000/api/customers?search=${term}`
       )
       .pipe(
         tap(data => this.cache.set(term, data))

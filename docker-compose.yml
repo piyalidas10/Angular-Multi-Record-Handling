@@ -1,27 +1,31 @@
-version: '3.9'
+version: "3.9"
 
 services:
 
-  frontend:
+  angular-app:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: angular19-ui
     ports:
-      - "4200:80"
+      - "8080:80"
     depends_on:
-      - backend
+      - node-api
     restart: unless-stopped
 
-  backend:
+  node-api:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: node-api
+    container_name: nodejs-api
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
     restart: unless-stopped
 
   redis:
@@ -29,4 +33,10 @@ services:
     container_name: redis-cache
     ports:
       - "6379:6379"
+    command: redis-server --appendonly yes
     restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
