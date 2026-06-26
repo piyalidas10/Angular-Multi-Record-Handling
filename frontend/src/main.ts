@@ -4,3 +4,14 @@ import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, appConfig)
   .catch((err) => console.error(err));
+
+// bootstrapApplication(AppComponent, {
+//   providers: [
+//     provideAnimations(),
+//     provideHttpClient(
+//       withInterceptors([
+//         mockRecordsInterceptor
+//       ])
+//     )
+//   ]
+// }).catch(err => console.error(err));
