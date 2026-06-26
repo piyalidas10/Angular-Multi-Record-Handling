@@ -1,16 +1,24 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "description": "REST backend for /api/records",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },
   "dependencies": {
+    "better-sqlite3": "^9.4.3",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^4.19.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@types/better-sqlite3": "^7.6.10",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
   }
 }
