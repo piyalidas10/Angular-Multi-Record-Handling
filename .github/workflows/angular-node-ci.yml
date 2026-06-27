@@ -1,0 +1,64 @@
+name: Enterprise CI
+
+on:
+
+  push:
+
+    branches:
+      - main
+
+  pull_request:
+
+    branches:
+      - main
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+
+      matrix:
+
+        node-version: [22.x]
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+
+        with:
+
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Frontend
+
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Build Frontend
+
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Install Backend
+
+        run: |
+          cd backend
+          npm ci
+
+      - name: Build Backend
+
+        run: |
+          cd backend
+          npm run build
+
+      - name: Docker Compose Build
+
+        run: |
+          docker compose -f docker/docker-compose.prod.yml build

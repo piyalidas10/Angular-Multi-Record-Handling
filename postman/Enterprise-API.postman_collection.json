@@ -1,0 +1,33 @@
+{
+  "info": {
+    "name": "Enterprise Performance API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/health",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Records",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:3000/api/records?page=1&pageSize=100"
+        }
+      }
+    }
+  ]
+}

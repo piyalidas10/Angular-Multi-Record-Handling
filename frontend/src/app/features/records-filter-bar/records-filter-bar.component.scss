@@ -1,0 +1,36 @@
+.filter-bar {
+      display: flex; flex-wrap: wrap; align-items: flex-end;
+      gap: .6rem .75rem; padding: .75rem 1rem;
+      background: #f7f8fa; border-bottom: 1px solid #e5e7eb;
+    }
+    .field { display: flex; flex-direction: column; gap: .2rem; }
+    .field label { font-size: .75rem; font-weight: 600; color: #57606a; }
+    input, select {
+      padding: .35rem .6rem; font-size: .85rem;
+      border: 1px solid #d1d5db; border-radius: 4px;
+      background: #fff; color: #1f2328; min-width: 120px;
+    }
+    input:focus, select:focus {
+      outline: 2px solid #3b82d4; outline-offset: 1px;
+    }
+    .field--range { flex-direction: row; align-items: flex-end; gap: .3rem; }
+    .field--range input { min-width: 70px; }
+    .field--range label { position: absolute; opacity: 0; pointer-events: none; }
+    .field--dir { flex-direction: row; gap: .3rem; align-items: flex-end; }
+    .dir-btn {
+      padding: .35rem .65rem; font-size: .82rem;
+      border: 1px solid #d1d5db; border-radius: 4px;
+      background: #fff; cursor: pointer; color: #1f2328;
+    }
+    .dir-btn.active { background: #3b82d4; color: #fff; border-color: #3b82d4; }
+    .reset-btn {
+      padding: .35rem .85rem; font-size: .82rem;
+      border: 1px solid #e5e7eb; border-radius: 4px;
+      background: #fff; cursor: pointer; color: #57606a;
+      align-self: flex-end;
+    }
+    .reset-btn:hover { background: #f3f4f6; }
+    .result-count {
+      align-self: flex-end; font-size: .8rem;
+      color: #57606a; padding-bottom: .35rem;
+    }

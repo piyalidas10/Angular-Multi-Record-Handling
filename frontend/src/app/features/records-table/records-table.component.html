@@ -1,0 +1,71 @@
+<div class="table-wrapper">
+
+      <!-- Header row -->
+      <div class="table-header" role="row">
+        @for (col of columns; track col.field) {
+          <div class="th" role="columnheader"
+               [style.flex]="col.flex"
+               [class.sortable]="col.sortable"
+               (click)="col.sortable && onSortClick(col.field)">
+            {{ col.label }}
+            @if (currentSort()?.field === col.field) {
+              <span class="sort-arrow">
+                {{ currentSort()!.direction === 'asc' ? '↑' : '↓' }}
+              </span>
+            }
+          </div>
+        }
+        <!-- Actions column -->
+        <div class="th" role="columnheader" style="flex: 0 0 80px;">Actions</div>
+      </div>
+
+      <!-- Virtual scroll body -->
+      <cdk-virtual-scroll-viewport
+        [itemSize]="ROW_HEIGHT"
+        [minBufferPx]="MIN_BUFFER"
+        [maxBufferPx]="MAX_BUFFER"
+        class="viewport"
+        role="rowgroup">
+
+        @if (loading()) {
+          <div class="loading-row">Loading…</div>
+        } @else if (displayRows().length === 0) {
+          <div class="empty-row">No records match your filters.</div>
+        } @else {
+          <div *cdkVirtualFor="let row of displayRows();
+                               trackBy: trackById;
+                               templateCacheSize: 30"
+               class="tr" role="row"
+               [class.row--inactive]="row.status === 'inactive'"
+               [class.row--pending]="row.status === 'pending'">
+
+            <div class="td id-col" role="cell">{{ row.id }}</div>
+            <div class="td name-col" role="cell" [title]="row.name">{{ row.name }}</div>
+            <div class="td" style="flex: 1" role="cell">{{ row.category }}</div>
+            <div class="td" role="cell">
+              <span class="status-badge status--{{ row.status }}">
+                {{ row.status }}
+              </span>
+            </div>
+            <div class="td amount-col" role="cell">
+              {{ row.amount | currency:'USD':'symbol':'1.2-2' }}
+            </div>
+            <div class="td date-col" role="cell">
+              {{ row.createdAt | date:'mediumDate' }}
+            </div>
+            <div class="td" style="flex: 0 0 80px" role="cell">
+              <button class="action-btn" (click)="onEdit(row)" title="Edit">✏</button>
+              <button class="action-btn action-btn--del" (click)="onDelete(row)" title="Delete">✕</button>
+            </div>
+          </div>
+        }
+      </cdk-virtual-scroll-viewport>
+
+      <!-- Worker stats (dev-only hint) -->
+      @if (workerStats()) {
+        <div class="worker-stats">
+          Worker processed {{ workerStats()!.count | number }} rows
+          in {{ workerStats()!.durationMs.toFixed(1) }}ms
+        </div>
+      }
+    </div>

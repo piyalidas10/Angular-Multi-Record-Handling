@@ -82,4 +82,3 @@ export interface WorkerResponse {
   durationMs: number;
 }
 
-// Made with Bob

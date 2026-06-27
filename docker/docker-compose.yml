@@ -1,42 +1,74 @@
 version: "3.9"
 
 services:
-
   angular-app:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: enterprise-angular-ui:latest
     container_name: angular19-ui
+
     ports:
       - "8080:80"
+
     depends_on:
-      - node-api
+      node-api:
+        condition: service_started
+
     restart: unless-stopped
+
+    networks:
+      - enterprise-network
 
   node-api:
     build:
       context: ./backend
       dockerfile: Dockerfile
+
+    image: enterprise-node-api:latest
+
     container_name: nodejs-api
+
     ports:
       - "3000:3000"
+
     environment:
       NODE_ENV: production
+      PORT: 3000
+
       REDIS_HOST: redis
       REDIS_PORT: 6379
+
     depends_on:
-      - redis
+      redis:
+        condition: service_started
+
     restart: unless-stopped
+
+    networks:
+      - enterprise-network
 
   redis:
     image: redis:7-alpine
+
     container_name: redis-cache
+
+    command: redis-server --appendonly yes
+
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes
-    restart: unless-stopped
+
     volumes:
       - redis_data:/data
 
+    restart: unless-stopped
+
+    networks:
+      - enterprise-network
+
 volumes:
   redis_data:
+
+networks:
+  enterprise-network:
+    driver: bridge

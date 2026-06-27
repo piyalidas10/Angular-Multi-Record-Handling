@@ -1,0 +1,53 @@
+:host { display: flex; flex-direction: column; flex: 1 1 auto; overflow: hidden; }
+    .table-wrapper { display: flex; flex-direction: column; height: 100%; }
+    .table-header {
+      display: flex; align-items: center;
+      background: #f7f8fa; border-bottom: 2px solid #e5e7eb;
+      padding: 0 .5rem; font-size: .78rem; font-weight: 700;
+      color: #57606a; text-transform: uppercase; letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+    .th {
+      padding: .55rem .5rem; user-select: none;
+    }
+    .th.sortable { cursor: pointer; }
+    .th.sortable:hover { color: #3b82d4; }
+    .sort-arrow { margin-left: .2rem; color: #3b82d4; }
+    .viewport { flex: 1 1 auto; }
+    .tr {
+      display: flex; align-items: center;
+      padding: 0 .5rem; border-bottom: 1px solid #f0f1f3;
+      background: #fff; font-size: .85rem; color: #1f2328;
+      transition: background .1s;
+    }
+    .tr:hover { background: #f7f8fa; }
+    .tr.row--inactive { opacity: .55; }
+    .tr.row--pending  { background: #fffbeb; }
+    .td { padding: .45rem .5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .id-col     { flex: 0 0 70px;  color: #57606a; }
+    .name-col   { flex: 2; }
+    .amount-col { flex: 0 0 110px; text-align: right; font-variant-numeric: tabular-nums; }
+    .date-col   { flex: 0 0 110px; color: #57606a; }
+    .status-badge {
+      display: inline-block; padding: .1rem .45rem;
+      border-radius: 10px; font-size: .72rem; font-weight: 600;
+    }
+    .status--active   { background: #d1fae5; color: #065f46; }
+    .status--inactive { background: #f3f4f6; color: #57606a; }
+    .status--pending  { background: #fef9c3; color: #713f12; }
+    .loading-row, .empty-row {
+      display: flex; align-items: center; justify-content: center;
+      height: 120px; color: #57606a; font-size: .9rem;
+    }
+    .action-btn {
+      padding: .2rem .4rem; font-size: .78rem;
+      border: 1px solid #e5e7eb; border-radius: 4px;
+      background: transparent; cursor: pointer; color: #57606a;
+      margin-right: .2rem;
+    }
+    .action-btn:hover { background: #f3f4f6; }
+    .action-btn--del:hover { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+    .worker-stats {
+      font-size: .72rem; color: #57606a; padding: .3rem .75rem;
+      border-top: 1px solid #e5e7eb; background: #f7f8fa;
+    }

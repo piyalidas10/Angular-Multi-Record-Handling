@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { PageRequest, PagedResult, RecordItem } from '../models/records.model';
 import { RecordsCacheService } from './records-cache.service';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Records API Service
@@ -23,7 +24,7 @@ import { RecordsCacheService } from './records-cache.service';
  */
 @Injectable({ providedIn: 'root' })
 export class RecordsApiService {
-  private readonly API = '/api/records';
+  private readonly API = `${environment.apiBaseUrl}/api/records`;
   private readonly http  = inject(HttpClient);
   private readonly cache = inject(RecordsCacheService);
 
@@ -101,4 +102,3 @@ export class RecordsApiService {
   }
 }
 
-// Made with Bob

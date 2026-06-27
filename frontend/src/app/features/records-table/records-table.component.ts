@@ -1,10 +1,11 @@
 import {
   ChangeDetectionStrategy, Component, NgZone,
-  OnDestroy, OnInit, inject, input, output, signal, computed
+  OnDestroy, OnInit, inject, input, output, signal, computed,
+  effect
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { RecordItem, SortParams, SortDirection, WorkerRequest, WorkerResponse } from '../models/records.model';
+import { RecordItem, SortParams, SortDirection, WorkerRequest, WorkerResponse } from '../../core/models/records.model';
 
 /**
  * Records Virtual-Scroll Table
@@ -27,134 +28,8 @@ import { RecordItem, SortParams, SortDirection, WorkerRequest, WorkerResponse } 
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, ScrollingModule],
-  template: `
-    <div class="table-wrapper">
-
-      <!-- Header row -->
-      <div class="table-header" role="row">
-        @for (col of columns; track col.field) {
-          <div class="th" role="columnheader"
-               [style.flex]="col.flex"
-               [class.sortable]="col.sortable"
-               (click)="col.sortable && onSortClick(col.field)">
-            {{ col.label }}
-            @if (currentSort()?.field === col.field) {
-              <span class="sort-arrow">
-                {{ currentSort()!.direction === 'asc' ? '↑' : '↓' }}
-              </span>
-            }
-          </div>
-        }
-        <!-- Actions column -->
-        <div class="th" role="columnheader" style="flex: 0 0 80px;">Actions</div>
-      </div>
-
-      <!-- Virtual scroll body -->
-      <cdk-virtual-scroll-viewport
-        [itemSize]="ROW_HEIGHT"
-        [minBufferPx]="MIN_BUFFER"
-        [maxBufferPx]="MAX_BUFFER"
-        class="viewport"
-        role="rowgroup">
-
-        @if (loading()) {
-          <div class="loading-row">Loading…</div>
-        } @else if (displayRows().length === 0) {
-          <div class="empty-row">No records match your filters.</div>
-        } @else {
-          <div *cdkVirtualFor="let row of displayRows();
-                               trackBy: trackById;
-                               templateCacheSize: 30"
-               class="tr" role="row"
-               [class.row--inactive]="row.status === 'inactive'"
-               [class.row--pending]="row.status === 'pending'">
-
-            <div class="td id-col" role="cell">{{ row.id }}</div>
-            <div class="td name-col" role="cell" [title]="row.name">{{ row.name }}</div>
-            <div class="td" style="flex: 1" role="cell">{{ row.category }}</div>
-            <div class="td" role="cell">
-              <span class="status-badge status--{{ row.status }}">
-                {{ row.status }}
-              </span>
-            </div>
-            <div class="td amount-col" role="cell">
-              {{ row.amount | currency:'USD':'symbol':'1.2-2' }}
-            </div>
-            <div class="td date-col" role="cell">
-              {{ row.createdAt | date:'mediumDate' }}
-            </div>
-            <div class="td" style="flex: 0 0 80px" role="cell">
-              <button class="action-btn" (click)="onEdit(row)" title="Edit">✏</button>
-              <button class="action-btn action-btn--del" (click)="onDelete(row)" title="Delete">✕</button>
-            </div>
-          </div>
-        }
-      </cdk-virtual-scroll-viewport>
-
-      <!-- Worker stats (dev-only hint) -->
-      @if (workerStats()) {
-        <div class="worker-stats">
-          Worker processed {{ workerStats()!.count | number }} rows
-          in {{ workerStats()!.durationMs.toFixed(1) }}ms
-        </div>
-      }
-    </div>
-  `,
-  styles: [`
-    :host { display: flex; flex-direction: column; flex: 1 1 auto; overflow: hidden; }
-    .table-wrapper { display: flex; flex-direction: column; height: 100%; }
-    .table-header {
-      display: flex; align-items: center;
-      background: #f7f8fa; border-bottom: 2px solid #e5e7eb;
-      padding: 0 .5rem; font-size: .78rem; font-weight: 700;
-      color: #57606a; text-transform: uppercase; letter-spacing: .04em;
-      flex-shrink: 0;
-    }
-    .th {
-      padding: .55rem .5rem; user-select: none;
-    }
-    .th.sortable { cursor: pointer; }
-    .th.sortable:hover { color: #3b82d4; }
-    .sort-arrow { margin-left: .2rem; color: #3b82d4; }
-    .viewport { flex: 1 1 auto; }
-    .tr {
-      display: flex; align-items: center;
-      padding: 0 .5rem; border-bottom: 1px solid #f0f1f3;
-      background: #fff; font-size: .85rem; color: #1f2328;
-      transition: background .1s;
-    }
-    .tr:hover { background: #f7f8fa; }
-    .tr.row--inactive { opacity: .55; }
-    .tr.row--pending  { background: #fffbeb; }
-    .td { padding: .45rem .5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .id-col     { flex: 0 0 70px;  color: #57606a; }
-    .name-col   { flex: 2; }
-    .amount-col { flex: 0 0 110px; text-align: right; font-variant-numeric: tabular-nums; }
-    .date-col   { flex: 0 0 110px; color: #57606a; }
-    .status-badge {
-      display: inline-block; padding: .1rem .45rem;
-      border-radius: 10px; font-size: .72rem; font-weight: 600;
-    }
-    .status--active   { background: #d1fae5; color: #065f46; }
-    .status--inactive { background: #f3f4f6; color: #57606a; }
-    .status--pending  { background: #fef9c3; color: #713f12; }
-    .loading-row, .empty-row {
-      display: flex; align-items: center; justify-content: center;
-      height: 120px; color: #57606a; font-size: .9rem;
-    }
-    .action-btn {
-      padding: .2rem .4rem; font-size: .78rem;
-      border: 1px solid #e5e7eb; border-radius: 4px;
-      background: transparent; cursor: pointer; color: #57606a;
-      margin-right: .2rem;
-    }
-    .action-btn:hover { background: #f3f4f6; }
-    .action-btn--del:hover { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
-    .worker-stats {
-      font-size: .72rem; color: #57606a; padding: .3rem .75rem;
-      border-top: 1px solid #e5e7eb; background: #f7f8fa;
-    }
-  `]
+  templateUrl: './records-table.component.html',
+  styleUrls: ['./records-table.component.scss']
 })
 export class RecordsTableComponent implements OnInit, OnDestroy {
   // ── Inputs ────────────────────────────────────────────────────────────────
@@ -190,11 +65,25 @@ export class RecordsTableComponent implements OnInit, OnDestroy {
   private worker: Worker | null = null;
   private readonly zone = inject(NgZone);
 
+
+  constructor() {
+    effect(() => {
+      const rows = this.rows();
+
+      console.log('Rows changed:', rows.length);
+
+      if (rows.length) {
+        this.processRows();
+      } else {
+        this.displayRows.set([]);
+      }
+    });
+  }
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.currentSort.set(this.initialSort());
     this.initWorker();
-    this.processRows();
   }
 
   ngOnDestroy(): void {
@@ -231,7 +120,7 @@ export class RecordsTableComponent implements OnInit, OnDestroy {
     }
 
     this.worker = new Worker(
-      new URL('../workers/records.worker', import.meta.url),
+      new URL('../../core/workers/records.worker', import.meta.url),
       { type: 'module' }
     );
 
@@ -245,6 +134,7 @@ export class RecordsTableComponent implements OnInit, OnDestroy {
   }
 
   private processRows(sort?: SortParams): void {
+    console.log('rows received', this.rows().length);
     const records = this.rows();
     if (!records?.length) {
       this.displayRows.set([]);
@@ -266,4 +156,3 @@ export class RecordsTableComponent implements OnInit, OnDestroy {
   }
 }
 
-// Made with Bob

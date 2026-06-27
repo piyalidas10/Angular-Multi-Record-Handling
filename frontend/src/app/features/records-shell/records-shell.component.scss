@@ -1,0 +1,62 @@
+:host { display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            font-family: -apple-system, "Segoe UI", system-ui, sans-serif; }
+    .shell { display: flex; flex-direction: column; height: 100%; background: #fff; }
+    .shell-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .75rem 1rem; border-bottom: 1px solid #e5e7eb;
+      background: #fff; flex-shrink: 0;
+    }
+    .shell-title { margin: 0; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
+    .loading-badge {
+      font-size: .72rem; font-weight: 600;
+      background: #dbeafe; color: #1e40af;
+      padding: .15rem .5rem; border-radius: 10px;
+    }
+    .header-meta { display: flex; align-items: center; gap: .75rem; }
+    .cache-hint { font-size: .75rem; color: #57606a; }
+    .new-btn {
+      padding: .4rem .85rem; font-size: .85rem;
+      background: #3b82d4; color: #fff;
+      border: none; border-radius: 5px; cursor: pointer;
+    }
+    .new-btn:hover { background: #2563eb; }
+    .error-banner {
+      display: flex; align-items: center; gap: .75rem;
+      background: #fee2e2; color: #991b1b;
+      padding: .6rem 1rem; font-size: .85rem; flex-shrink: 0;
+    }
+    .error-banner button {
+      padding: .2rem .6rem; border: 1px solid #fca5a5;
+      border-radius: 4px; background: #fff; color: #991b1b; cursor: pointer;
+    }
+    app-records-table { flex: 1 1 auto; overflow: hidden; min-height: 0; }
+    .pagination {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .55rem 1rem; border-top: 1px solid #e5e7eb;
+      background: #f7f8fa; flex-shrink: 0; flex-wrap: wrap;
+    }
+    .page-btn {
+      padding: .3rem .65rem; font-size: .83rem;
+      border: 1px solid #d1d5db; border-radius: 4px;
+      background: #fff; cursor: pointer; color: #1f2328;
+    }
+    .page-btn:hover:not(:disabled) { background: #f3f4f6; }
+    .page-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .page-info { font-size: .83rem; color: #57606a; padding: 0 .25rem; }
+    .page-size {
+      padding: .3rem .5rem; font-size: .83rem;
+      border: 1px solid #d1d5db; border-radius: 4px;
+      background: #fff; margin-left: auto;
+    }
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.4);
+      display: flex; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal {
+      background: #fff; border-radius: 8px;
+      padding: 1.5rem 2rem; min-width: 320px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.15);
+    }
+    .modal h3 { margin: 0 0 .5rem; }
+    .modal-name { color: #57606a; margin: 0 0 1.25rem; }
+    .modal-actions { display: flex; gap: .5rem; }

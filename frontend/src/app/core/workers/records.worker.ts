@@ -1,4 +1,4 @@
-/// <reference lib="webworker" />
+// <reference lib="webworker" />
 /**
  * Records Web Worker
  *
@@ -84,4 +84,3 @@ function applySort(records: RecordItem[], sort?: SortParams): RecordItem[] {
   });
 }
 
-// Made with Bob

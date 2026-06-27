@@ -5,14 +5,11 @@ import {
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, switchMap, tap, startWith, debounceTime } from 'rxjs';
-import { RecordsFilterBarComponent, FilterChangeEvent } from './records-filter-bar.component';
-import { RecordsTableComponent } from './records-table.component';
-import { RecordsApiService } from '../services/records-api.service';
-import { RecordsCacheService } from '../services/records-cache.service';
-import {
-  RecordItem, PageRequest, RecordsState,
-  SortParams, FilterParams, DEFAULT_PAGE_SIZE
-} from '../models/records.model';
+import { FilterChangeEvent, RecordsFilterBarComponent } from '../records-filter-bar/records-filter-bar.component';
+import { RecordsTableComponent } from '../records-table/records-table.component';
+import { RecordsApiService } from '../../core/services/records-api.service';
+import { RecordsCacheService } from '../../core/services/records-cache.service';
+import { DEFAULT_PAGE_SIZE, FilterParams, PageRequest, RecordItem, RecordsState, SortParams } from '../../core/models/records.model';
 
 /**
  * Records Shell Component — Orchestrator
@@ -35,155 +32,8 @@ import {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RecordsFilterBarComponent, RecordsTableComponent],
-  template: `
-    <div class="shell">
-
-      <!-- ── Header ──────────────────────────────────────────────── -->
-      <div class="shell-header">
-        <h1 class="shell-title">Records
-          @if (state().loading) {
-            <span class="loading-badge">Loading…</span>
-          }
-        </h1>
-        <div class="header-meta">
-          <span class="cache-hint">Cache: {{ cacheSize() }} pages</span>
-          <button class="new-btn" (click)="onNewRecord()">+ New</button>
-        </div>
-      </div>
-
-      <!-- ── Filter bar ───────────────────────────────────────────── -->
-      <app-records-filter-bar
-        [totalItems]="state().totalItems"
-        (filterChange)="onFilterChange($event)"/>
-
-      <!-- ── Error banner ─────────────────────────────────────────── -->
-      @if (state().error) {
-        <div class="error-banner" role="alert">
-          ⚠ {{ state().error }}
-          <button (click)="retryLoad()">Retry</button>
-        </div>
-      }
-
-      <!-- ── Virtual-scroll table ─────────────────────────────────── -->
-      <app-records-table
-        [rows]="currentRows()"
-        [loading]="state().loading"
-        [initialSort]="sort()"
-        (sortChange)="onSortChange($event)"
-        (editRow)="onEditRow($event)"
-        (deleteRow)="onDeleteRow($event)"/>
-
-      <!-- ── Pagination bar ───────────────────────────────────────── -->
-      <div class="pagination" aria-label="Pagination">
-        <button class="page-btn"
-                [disabled]="state().currentPage === 0"
-                (click)="goToPage(0)">«</button>
-        <button class="page-btn"
-                [disabled]="state().currentPage === 0"
-                (click)="prevPage()">‹ Prev</button>
-
-        <span class="page-info">
-          Page {{ state().currentPage + 1 }} / {{ state().totalPages || 1 }}
-          ({{ state().totalItems | number }} total)
-        </span>
-
-        <button class="page-btn"
-                [disabled]="state().currentPage >= state().totalPages - 1"
-                (click)="nextPage()">Next ›</button>
-        <button class="page-btn"
-                [disabled]="state().currentPage >= state().totalPages - 1"
-                (click)="goToPage(state().totalPages - 1)">»</button>
-
-        <!-- Page size selector -->
-        <select class="page-size" [value]="pageSize()"
-                (change)="onPageSizeChange($event)">
-          @for (sz of pageSizes; track sz) {
-            <option [value]="sz">{{ sz }} / page</option>
-          }
-        </select>
-      </div>
-
-    </div>
-
-    <!-- ── Edit modal (inline demo) ─────────────────────────────────── -->
-    @if (editTarget()) {
-      <div class="modal-overlay" (click)="editTarget.set(null)">
-        <div class="modal" (click)="$event.stopPropagation()" role="dialog"
-             aria-modal="true" aria-label="Edit record">
-          <h3>Edit Record #{{ editTarget()!.id }}</h3>
-          <p class="modal-name">{{ editTarget()!.name }}</p>
-          <div class="modal-actions">
-            <button class="page-btn" (click)="saveEdit()">Save</button>
-            <button class="page-btn" (click)="editTarget.set(null)">Cancel</button>
-          </div>
-        </div>
-      </div>
-    }
-  `,
-  styles: [`
-    :host { display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-            font-family: -apple-system, "Segoe UI", system-ui, sans-serif; }
-    .shell { display: flex; flex-direction: column; height: 100%; background: #fff; }
-    .shell-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: .75rem 1rem; border-bottom: 1px solid #e5e7eb;
-      background: #fff; flex-shrink: 0;
-    }
-    .shell-title { margin: 0; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
-    .loading-badge {
-      font-size: .72rem; font-weight: 600;
-      background: #dbeafe; color: #1e40af;
-      padding: .15rem .5rem; border-radius: 10px;
-    }
-    .header-meta { display: flex; align-items: center; gap: .75rem; }
-    .cache-hint { font-size: .75rem; color: #57606a; }
-    .new-btn {
-      padding: .4rem .85rem; font-size: .85rem;
-      background: #3b82d4; color: #fff;
-      border: none; border-radius: 5px; cursor: pointer;
-    }
-    .new-btn:hover { background: #2563eb; }
-    .error-banner {
-      display: flex; align-items: center; gap: .75rem;
-      background: #fee2e2; color: #991b1b;
-      padding: .6rem 1rem; font-size: .85rem; flex-shrink: 0;
-    }
-    .error-banner button {
-      padding: .2rem .6rem; border: 1px solid #fca5a5;
-      border-radius: 4px; background: #fff; color: #991b1b; cursor: pointer;
-    }
-    app-records-table { flex: 1 1 auto; overflow: hidden; min-height: 0; }
-    .pagination {
-      display: flex; align-items: center; gap: .5rem;
-      padding: .55rem 1rem; border-top: 1px solid #e5e7eb;
-      background: #f7f8fa; flex-shrink: 0; flex-wrap: wrap;
-    }
-    .page-btn {
-      padding: .3rem .65rem; font-size: .83rem;
-      border: 1px solid #d1d5db; border-radius: 4px;
-      background: #fff; cursor: pointer; color: #1f2328;
-    }
-    .page-btn:hover:not(:disabled) { background: #f3f4f6; }
-    .page-btn:disabled { opacity: .4; cursor: not-allowed; }
-    .page-info { font-size: .83rem; color: #57606a; padding: 0 .25rem; }
-    .page-size {
-      padding: .3rem .5rem; font-size: .83rem;
-      border: 1px solid #d1d5db; border-radius: 4px;
-      background: #fff; margin-left: auto;
-    }
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.4);
-      display: flex; align-items: center; justify-content: center; z-index: 100;
-    }
-    .modal {
-      background: #fff; border-radius: 8px;
-      padding: 1.5rem 2rem; min-width: 320px;
-      box-shadow: 0 8px 32px rgba(0,0,0,.15);
-    }
-    .modal h3 { margin: 0 0 .5rem; }
-    .modal-name { color: #57606a; margin: 0 0 1.25rem; }
-    .modal-actions { display: flex; gap: .5rem; }
-  `]
+  templateUrl: './records-shell.component.html',
+  styleUrls: ['./records-shell.component.scss']
 })
 export class RecordsShellComponent implements OnInit {
   private readonly api       = inject(RecordsApiService);
@@ -219,7 +69,9 @@ export class RecordsShellComponent implements OnInit {
   private readonly load$ = new Subject<void>();
 
   ngOnInit(): void {
+    console.log('RecordsShellComponent initialized');
     this.load$.pipe(
+      tap(() => console.log('Subject emitted')),
       debounceTime(0),       // coalesce rapid signal changes in the same tick
       tap(() => this.state.update(s => ({ ...s, loading: true, error: null }))),
       switchMap(() => {
@@ -229,6 +81,7 @@ export class RecordsShellComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
       next: result => {
+        console.log('Results received', result);
         this.currentRows.set(result.data);
         this.state.set({
           totalItems:  result.totalItems,
@@ -332,7 +185,9 @@ export class RecordsShellComponent implements OnInit {
     };
   }
 
-  private triggerLoad(): void { this.load$.next(); }
+  private triggerLoad(): void {
+    console.log('triggerLoad');
+    this.load$.next(); 
+  }
 }
 
-// Made with Bob

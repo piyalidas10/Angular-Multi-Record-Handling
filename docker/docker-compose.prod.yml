@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+
+  angular-app:
+
+    build:
+      context: ../frontend
+
+    image: enterprise-angular
+
+    ports:
+      - "8080:80"
+
+    depends_on:
+      - node-api
+
+  node-api:
+
+    build:
+      context: ../backend
+
+    image: enterprise-node
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      REDIS_HOST: redis
+
+    depends_on:
+      - redis
+
+  redis:
+
+    image: redis:7-alpine
+
+    volumes:
+      - redis_data:/data
+
+volumes:
+
+    redis_data:
